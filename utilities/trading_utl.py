@@ -8,6 +8,7 @@ last modified: 2021-05-02
 
 # imports
 import datetime as dt
+import json
 import requests
 
 class AlphaVantageAPI(requests.Session):
@@ -16,10 +17,17 @@ class AlphaVantageAPI(requests.Session):
         super(AlphaVantageAPI, self).__init__()
         self.endpoint = 'https://www.alphavantage.co/query?'
 
-    def get_time_series(self, kwargs):
+    def get_time_series(self, url_params):
 
-        for key, value in kwargs:
-            path = f'{self.endpoint}'
+        path = (
+            f'{self.endpoint}{"&".join(f"{key}={value}" for key, value in url_params.items())}'
+        )
+        
+        results = self.get(path)
+        content = json.loads(results.content)
+
+        return content
+
 
         
 
