@@ -1,5 +1,10 @@
-
-
+"""
+file: main.py
+description: main algorithmic trading script
+created by: Kyle O'Connor
+created: 2021-05-03
+last modified: 2021-05-03
+"""
 import inspect
 import os
 import pathlib
@@ -23,12 +28,13 @@ def main():
     with open(vantage_keys, 'r') as f:
         vantage_key = f.readline().strip().split()[0]
 
+    url_params = {
+        'function': 'TIME_SERIES_INTRADAY', 'symbol': 'IBM',
+        'interval': '5min', 'apikey': vantage_key
+    }
     vantage_api_conn = AlphaVantageAPI(vantage_key)
-    vantage_api_conn.auth = vantage_key
+    check = vantage_api_conn.get_time_series(url_params)
     
-
-
-
 
 if __name__ == '__main__':
     main()
