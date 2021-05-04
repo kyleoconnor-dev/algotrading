@@ -13,7 +13,13 @@ import requests
 class AlphaVantageAPI(requests.Session):
 
     def __init__(self, api_key):
-        super(AlphaVantageAPI, self).__init__
+        super(AlphaVantageAPI, self).__init__()
+        self.endpoint = 'https://www.alphavantage.co/query?'
+
+    def get_time_series(self, kwargs):
+
+        for key, value in kwargs:
+            path = f'{self.endpoint}'
 
         
 
