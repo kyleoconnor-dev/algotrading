@@ -3,7 +3,7 @@ file: main.py
 description: main algorithmic trading script
 created by: Kyle O'Connor
 created: 2021-05-03
-last modified: 2021-05-03
+last modified: 2022-05-18
 """
 
 import datetime as dt
@@ -56,13 +56,15 @@ def main():
                 today_data_dict = {}
                 for w, v in zip(SPANS, values):
                     today_data_dict[w] = v
-                x=1
-
+                # add logic for making next steps
+                # pseudo code
+                # if 13_day < 48_day: bear market, do steps
+                # else: bull market, skip 
             except AssertionError:
                 print('No data found')
                 count += 1
-            # except KeyError:
-            #     print('Random Key Error - skip')
+            except KeyError:
+                print('Random Key Error - skip')
                 count += 1
     end = dt.datetime.now()
     total = end - start
