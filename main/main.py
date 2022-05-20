@@ -28,7 +28,7 @@ stock_sym_loc = os.path.join(PARENT_DIR, 'docs', 'NYSE.txt')
 SPANS = ['13', '48', '50', '200']
 
 UNDERVALUED_CAPS = si.get_undervalued_large_caps()
-x=1
+UNVERVALUED_SYM = list(UNDERVALUED_CAPS['Symbol'])
 
 def get_ema(dataframe):
 
@@ -68,15 +68,14 @@ def main():
                     try:
                         stats_val = si.get_stats_valuation(sym)
                     except IndexError:
-                        print('No stats valuation')
+                        print('No Stats')
                     try:
                         company_info = si.get_company_info(sym)
                     except TypeError:
                         print('No company info')
                     pe_ratio = quote_table.get('PE Ratio (TTM)')
+                    x=1
                     if pe_ratio < 20:
-                        data[['13_DAY_EMA', '50_DAY_EMA', '20_DAY_EMA']].plot()
-                        plt.show()
                         x=1
                         count += 1
                     else:
