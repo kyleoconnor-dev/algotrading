@@ -10,6 +10,7 @@ import datetime as dt
 import inspect
 import os
 import matplotlib.pyplot as plt
+import numpy as np
 import pandas as pd
 import sys
 import yahoo_fin.stock_info as si
@@ -38,6 +39,11 @@ def get_ema(dataframe):
     dataframe['200_DAY_EMA'] = dataframe['close'].ewm(span=200).mean()
 
     return dataframe
+
+def get_dip(data):
+    #pseudo code
+    # np.gradient() is close to zero
+    pass
 
 def main():
     start = dt.datetime.now()
@@ -74,18 +80,13 @@ def main():
                     except TypeError:
                         print('No company info')
                     pe_ratio = quote_table.get('PE Ratio (TTM)')
-                    x=1
                     if pe_ratio < 20:
-                        x=1
-                        count += 1
+                        pass 
+                        # do some stats and get "inflection point"
                     else:
                         count += 1
                 else:
                     count += 1
-                # add logic for making next steps
-                # pseudo code
-                # if 13_day < 48_day: bear market, do steps
-                # else: bull market, skip 
             except AssertionError:
                 print('No data found')
                 count += 1
