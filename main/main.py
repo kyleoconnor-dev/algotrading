@@ -31,6 +31,8 @@ SPANS = ['13', '48', '50', '200']
 UNDERVALUED_CAPS = si.get_undervalued_large_caps()
 UNVERVALUED_SYM = list(UNDERVALUED_CAPS['Symbol'])
 
+start = dt.datetime.now()
+
 def get_ema(dataframe):
 
     dataframe['13_DAY_EMA'] = dataframe['close'].ewm(span=13).mean()
@@ -49,7 +51,7 @@ def get_dip(data, today):
 
 
 def get_potential_stock_options():
-    start = dt.datetime.now()
+
     today = start.date()
     count = 0
     stock_options = {}
@@ -93,25 +95,34 @@ def get_potential_stock_options():
                             if va > -0.005 and va < 0.005:
                                 # return stock options
                                 stock_options[sym] = {}
+                                stock_options[sym]['data'] = data
                                 stock_options[sym]['company_info'] = company_info
                                 stock_options[sym]['quote_data'] = quote_data
                                 stock_options[sym]['quote_table'] = quote_table
                                 stock_options[sym]['stats'] = stats
-                                stock_options[sym][stats] = stats_val
+                                stock_options[sym]['stats_val'] = stats_val
+                                x=1
                                 break
+                        count += 1
                     else:
                         count += 1
+                        print(count)
+                        continue
                 else:
                     count += 1
+                    print(count)
+                    continue
             except AssertionError:
                 print('No data found')
                 count += 1
             except KeyError:
                 print('Random Key Error - skip')
                 count += 1
-    end = dt.datetime.now()
-    total = end - start
+            print(count)
     return stock_options
+
+def get_html(stock_options):
+    pass
 
 if __name__ == '__main__':
     stock_options = get_potential_stock_options()
