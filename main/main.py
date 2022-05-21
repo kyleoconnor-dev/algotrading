@@ -40,10 +40,14 @@ def get_ema(dataframe):
 
     return dataframe
 
-def get_dip(data):
+def get_dip(data, today):
+    prev_10_days = data.tail(10)
+    ema_50 = np.array(prev_10_days['50_DAY_EMA'])
+    gradient = np.gradient(ema_50)
+    x=1
     #pseudo code
     # np.gradient() is close to zero
-    pass
+
 
 def main():
     start = dt.datetime.now()
@@ -57,7 +61,7 @@ def main():
                 data['Date'] = data['date'].dt.date
                 datapoint = list(data['Date'])[0]
                 data = get_ema(data)
-                today_data = data[data['Date'] == today]
+                today_data = data[data['Date'] == today - dt.timedelta(days=1)]
                 values = [
                     list(today_data['13_DAY_EMA'])[0],
                     list(today_data['48_DAY_EMA'])[0],
@@ -80,6 +84,10 @@ def main():
                     except TypeError:
                         print('No company info')
                     pe_ratio = quote_table.get('PE Ratio (TTM)')
+
+                    # this block of code needs to go in pe_ratio if statement. 
+                    # Putting here for developing
+                    get_dip(data, today)
                     if pe_ratio < 20:
                         pass 
                         # do some stats and get "inflection point"
