@@ -44,15 +44,15 @@ def get_dip(data, today):
     prev_10_days = data.tail(10)
     ema_50 = np.array(prev_10_days['50_DAY_EMA'])
     gradient = np.gradient(ema_50)
-    x=1
-    #pseudo code
-    # np.gradient() is close to zero
+    
+    return gradient
 
 
-def main():
+def get_potential_stock_options():
     start = dt.datetime.now()
     today = start.date()
     count = 0
+    stock_options = {}
     with open(stock_sym_loc, 'r') as f:
         for line in f.readlines():
             sym = line.strip().split('\t')[0]
@@ -79,18 +79,26 @@ def main():
                         stats_val = si.get_stats_valuation(sym)
                     except IndexError:
                         print('No Stats')
+                        stats_val = 'No stats valuation'
                     try:
                         company_info = si.get_company_info(sym)
                     except TypeError:
                         print('No company info')
+                        company_info = "No Company Info"
                     pe_ratio = quote_table.get('PE Ratio (TTM)')
 
-                    # this block of code needs to go in pe_ratio if statement. 
-                    # Putting here for developing
-                    get_dip(data, today)
                     if pe_ratio < 20:
-                        pass 
-                        # do some stats and get "inflection point"
+                        gradient = get_dip(data, today)
+                        for va in gradient:
+                            if va > -0.005 and va < 0.005:
+                                # return stock options
+                                stock_options[sym] = {}
+                                stock_options[sym]['company_info'] = company_info
+                                stock_options[sym]['quote_data'] = quote_data
+                                stock_options[sym]['quote_table'] = quote_table
+                                stock_options[sym]['stats'] = stats
+                                stock_options[sym][stats] = stats_val
+                                break
                     else:
                         count += 1
                 else:
@@ -103,7 +111,7 @@ def main():
                 count += 1
     end = dt.datetime.now()
     total = end - start
-    print(total)
+    return stock_options
 
 if __name__ == '__main__':
-    main()
+    stock_options = get_potential_stock_options()
