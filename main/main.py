@@ -95,7 +95,7 @@ def get_potential_stock_options():
                             if va > -0.005 and va < 0.005:
                                 # return stock options
                                 stock_options[sym] = {}
-                                stock_options[sym]['data'] = data
+                                stock_options[sym]['last_50_days_data'] = data.tail(50)
                                 stock_options[sym]['company_info'] = company_info
                                 stock_options[sym]['quote_data'] = quote_data
                                 stock_options[sym]['quote_table'] = quote_table
