@@ -53,17 +53,26 @@ def get_dip(data, today):
 def get_potential_stock_options():
 
     today = start.date()
+    day_of_week = today.weekday()
+    if day_of_week == 5:
+        day_diff = 1
+    elif day_of_week == 6:
+        day_diff = 2
+    else:
+        day_diff = 0
+    retrieve_start = today - dt.timedelta(days=365)
+    retrieve_start = retrieve_start.strftime('%m/%d/%Y')
     count = 0
     stock_options = {}
     with open(stock_sym_loc, 'r') as f:
         for line in f.readlines():
             sym = line.strip().split('\t')[0]
             try:
-                data = si.get_data(sym, index_as_date=False)
+                data = si.get_data(sym, index_as_date=False, start_date=retrieve_start)
                 data['Date'] = data['date'].dt.date
                 datapoint = list(data['Date'])[0]
                 data = get_ema(data)
-                today_data = data[data['Date'] == today - dt.timedelta(days=1)]
+                today_data = data[data['Date'] == today - dt.timedelta(days=day_diff)]
                 values = [
                     list(today_data['13_DAY_EMA'])[0],
                     list(today_data['48_DAY_EMA'])[0],
