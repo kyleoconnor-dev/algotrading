@@ -83,9 +83,22 @@ def get_potential_stock_options():
                 for w, v in zip(SPANS, values):
                     today_data_dict[w] = v
                 if today_data_dict['50'] < today_data_dict['200']:
-                    quote_data = si.get_quote_data(sym)
-                    quote_table = si.get_quote_table(sym)
-                    stats = si.get_stats(sym)
+                    try:
+                        quote_data = si.get_quote_data(sym)
+                    except IndexError:
+                        print('No quote data')
+                        quote_data = 'No quote data'
+                        count += 1
+                    try:
+                        quote_table = si.get_quote_table(sym)
+                    except IndexError:
+                        print('No quote table')
+                        quote_table = 'No quote table'
+                    try:
+                        stats = si.get_stats(sym)
+                    except IndexError:
+                        print('No stats')
+                        stats = 'No stats'
                     try:
                         stats_val = si.get_stats_valuation(sym)
                     except IndexError:
@@ -124,10 +137,13 @@ def get_potential_stock_options():
             except AssertionError:
                 print('No data found')
                 count += 1
+                continue
             except KeyError:
                 print('Random Key Error - skip')
                 count += 1
+                continue
             print(count)
+    x=1
     return stock_options
 
 def get_html(stock_options):
