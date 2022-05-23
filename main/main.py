@@ -72,11 +72,8 @@ def get_potential_stock_options():
     count = 0
     stock_options = {}
     with open(stock_sym_loc, 'r') as f:
-        symbols = ['AAP', 'ABEV']
-        for s in symbols:
-            sym = s
-        # for line in f.readlines():
-            # sym = line.strip().split('\t')[0]
+        for line in f.readlines():
+            sym = line.strip().split('\t')[0]
             try:
                 try:
                     data = si.get_data(sym, index_as_date=False, start_date=retrieve_start)
