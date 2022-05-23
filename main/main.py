@@ -163,7 +163,10 @@ def get_html(stock_options):
             if data == 'last_50_days_data':
                 continue
             df = stock_dict[data]
-            html_page = html_page + f'<h2>{data}</h2>' + df.to_html() + '<br>'
+            try:
+                html_page = html_page + f'<h2>{data}</h2>' + df.to_html() + '<br>'
+            except Exception as e:
+                print(f'Exception occured for html {e}')
 
     return html_page
 
@@ -195,7 +198,7 @@ if __name__ == '__main__':
     up_loc = os.path.join(SCRIPT_LOC, 'up')
     with open(up_loc, 'r') as f:
         username, password = f.readline().strip().split('\t')
-    send_email(username, password)
+    # send_email(username, password)
     end_dt = dt.datetime.now()
     total = end_dt - start_dt
     print(total)
