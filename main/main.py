@@ -129,16 +129,13 @@ def get_potential_stock_options():
                                     stock_options[sym]['quote_table'] = pd.DataFrame(quote_table, index = [0])
                                     stock_options[sym]['stats'] = stats
                                     stock_options[sym]['stats_val'] = stats_val
-                                    x=1
-                                    break
-                            count += 1
+                                    count += 1
+                                    break 
                         else:
                             count += 1
-                            print(count)
                             # continue
                     else:
                         count += 1
-                        print(count)
                         # continue
                 except AssertionError:
                     print('No data found')
