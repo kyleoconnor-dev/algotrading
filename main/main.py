@@ -71,9 +71,12 @@ def get_potential_stock_options():
     retrieve_start = retrieve_start.strftime('%m/%d/%Y')
     count = 0
     stock_options = {}
+    stock_options_dict = {}
     with open(stock_sym_loc, 'r') as f:
-        for line in f.readlines():
-            sym = line.strip().split('\t')[0]
+        # for line in f.readlines():
+        for s in ['AAP', 'ABEV']:
+            sym = s
+            # sym = line.strip().split('\t')[0]
             try:
                 try:
                     data = si.get_data(sym, index_as_date=False, start_date=retrieve_start)
@@ -129,8 +132,31 @@ def get_potential_stock_options():
                                     stock_options[sym]['quote_table'] = pd.DataFrame(quote_table, index = [0])
                                     stock_options[sym]['stats'] = stats
                                     stock_options[sym]['stats_val'] = stats_val
-                                    count += 1
+
+                                    stock_options_dict[sym] = {}
+                                    try:
+                                        tail_df = data.tail(50)
+                                        stock_options_dict[sym]['last_50_days'] = tail_df.to_dict()
+                                        x=1
+                                    except:
+                                        stock_options_dict[sym]['last_50_days'] = 'No data'
+                                    try:
+                                        stock_options_dict[sym]['company_info'] = company_info.to_dict()
+                                    except:
+                                        stock_options_dict[sym]['company_info'] = 'No company info'
+                                    stock_options_dict[sym]['quote_data'] = quote_data
+                                    stock_options_dict[sym]['quote_table'] = quote_table
+                                    try:
+                                        stock_options_dict[sym]['stats'] = stats.to_dict()
+                                    except:
+                                        stock_options_dict[sym]['stats'] = 'No stats'
+                                    try:
+                                        stock_options_dict[sym]['stats_val'] = stats_val.to_dict()
+                                    except:
+                                        stock_options_dict[sym]['stats_val'] = 'No stats valuation'
+                                    x=1
                                     break 
+                            count += 1
                         else:
                             count += 1
                             # continue
@@ -141,14 +167,14 @@ def get_potential_stock_options():
                     print('No data found')
                     count += 1
                     # continue
-                except KeyError:
-                    print('Random Key Error - skip')
-                    count += 1
-                    # continue
+                # except KeyError:
+                #     print('Random Key Error - skip')
+                #     count += 1
+                #     # continue
                 print(count)
             except Exception as e:
                 print(e)
-
+    x=1
     return stock_options
 
 def get_html(stock_options):
@@ -195,7 +221,7 @@ if __name__ == '__main__':
     up_loc = os.path.join(SCRIPT_LOC, 'up')
     with open(up_loc, 'r') as f:
         username, password = f.readline().strip().split('\t')
-    # send_email(username, password)
+    send_email(username, password)
     end_dt = dt.datetime.now()
     total = end_dt - start_dt
     print(total)
