@@ -6,10 +6,10 @@ created: 2021-05-03
 last modified: 2022-05-18
 """
 
+import asyncio
 import datetime as dt
 import inspect
 import os
-import matplotlib.pyplot as plt
 import smtplib
 import numpy as np
 import pandas as pd
@@ -18,10 +18,13 @@ import yahoo_fin.stock_info as si
 import warnings
 warnings.filterwarnings("ignore")
 
+import aiohttp
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from email.mime.base import MIMEBase
 from email import encoders
+
+from yahoo_finance import YahooFinance
 
 SCRIPT_PTH = os.path.realpath(inspect.stack()[0][1])
 SCRIPT_LOC = os.path.dirname(SCRIPT_PTH)
@@ -73,10 +76,11 @@ def get_potential_stock_options():
     stock_options = {}
     stock_options_dict = {}
     with open(stock_sym_loc, 'r') as f:
-        # for line in f.readlines():
-        for s in ['AAP', 'ABEV']:
-            sym = s
-            # sym = line.strip().split('\t')[0]
+        lines = f.readlines()
+        for line in f.readlines():
+        # for s in ['AAP', 'ABEV']:
+        #     sym = s
+            sym = line.strip().split('\t')[0]
             try:
                 try:
                     data = si.get_data(sym, index_as_date=False, start_date=retrieve_start)
@@ -193,35 +197,38 @@ def get_html(stock_options):
 
     return html_page
 
-def send_email(username, paswword):
+# def send_email(username, paswword):
+#
+#     stock_date = start.strftime('%m-%d-%Y')
+#
+#     #Setup the MIME
+#     message = MIMEMultipart()
+#     message['From'] = username
+#     message['To'] = username
+#     message['Subject'] = f'Stock results from {stock_date}'
+#     with open(os.path.join(PARENT_DIR, 'html.html'), 'r') as f:
+#         content = f.read()
+#         message.attach(MIMEText(content, 'html'))
+#     #Create SMTP session for sending the mail
+#     session = smtplib.SMTP('smtp.gmail.com', 587) #use gmail with port
+#     session.starttls() #enable security
+#     session.login(username, password) #login with mail_id and password
+#     text = message.as_string()
+#     session.sendmail(username, username, text)
+#     session.quit()
+#     print('Mail Sent')
 
-    stock_date = start.strftime('%m-%d-%Y')
+async def get_data(yahoo_fin):
+    data = await yahoo_fin.get_daily_data('AAPL')
+    return data
 
-    #Setup the MIME
-    message = MIMEMultipart()
-    message['From'] = username
-    message['To'] = username
-    message['Subject'] = f'Stock results from {stock_date}'
-    with open(os.path.join(PARENT_DIR, 'html.html'), 'r') as f:
-        content = f.read()
-        message.attach(MIMEText(content, 'html'))
-    #Create SMTP session for sending the mail
-    session = smtplib.SMTP('smtp.gmail.com', 587) #use gmail with port
-    session.starttls() #enable security
-    session.login(username, password) #login with mail_id and password
-    text = message.as_string()
-    session.sendmail(username, username, text)
-    session.quit()
-    print('Mail Sent')
 
 if __name__ == '__main__':
-    start_dt = dt.datetime.now()
-    stock_options = get_potential_stock_options()
-    html_page = get_html(stock_options)
-    up_loc = os.path.join(SCRIPT_LOC, 'up')
-    with open(up_loc, 'r') as f:
-        username, password = f.readline().strip().split('\t')
-    send_email(username, password)
-    end_dt = dt.datetime.now()
-    total = end_dt - start_dt
-    print(total)
+    async def get_r():
+        async with aiohttp.ClientSession() as session:
+            yahoo_fin = YahooFinance(session)
+            data = await get_data(yahoo_fin)
+            x=1
+
+    asyncio.run(get_r())
+    x=1
