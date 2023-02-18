@@ -40,6 +40,8 @@ stock_data_file = os.path.join(PARENT_DIR, 'docs', 'data.json')
 
 SPANS = ['13', '48', '50', '200']
 
+INDICATORS = ['open', 'high', 'close', 'volume', 'low']
+
 UNDERVALUED_CAPS = si.get_undervalued_large_caps()
 UNVERVALUED_SYM = list(UNDERVALUED_CAPS['Symbol'])
 
@@ -54,7 +56,7 @@ def get_ema(dataframe):
 
     return dataframe
 
-def get_dip(data, today):
+def get_dip(data):
 
     prev_10_days = data.tail(10)
     ema_50 = np.array(prev_10_days['50_DAY_EMA'])
@@ -233,6 +235,47 @@ async def get_stock_data(symbols, start, end):
         stock_data = await asyncio.gather(*tasks, return_exceptions=True)
         return stock_data
 
+def reformat_data(results):
+    stock_data = [r['chart']['result'][0] for r in results]
+    reformatted_data = []
+    for s in stock_data:
+        entry = {}
+        metadata = s.get('meta')
+        entry['meta'] = metadata
+        indicators = s['indicators']
+        quote = indicators['quote'][0]
+        timestamps = s.get('timestamp')
+        data_entries = []
+        if timestamps:
+            for i, t in enumerate(timestamps):
+                data_entry = {}
+                time = datetime.datetime.fromtimestamp(t)
+                data_entry['datetime'] = time
+                for ind in INDICATORS:
+                    values = quote[ind]
+                    value = values[i]
+                    data_entry[ind] = value
+                data_entries.append(data_entry)
+            entry['data'] = data_entries
+            reformatted_data.append(entry)
+        else:
+            continue
+    return reformatted_data
+
+def get_chart_dfs(reformatted_data):
+    for i in reformatted_data:
+        data = i['data']
+        INDICATORS.insert(0, 'datetime')
+        datasets = {}
+        for c in INDICATORS:
+            values = [j[c] for j in data]
+            datasets[c] = values
+        df = pd.DataFrame(datasets)
+        df_ema = get_ema(df)
+        i['df'] = df_ema
+    return reformatted_data
+
+
 def main():
 
     # comment out code below is for production use
@@ -263,7 +306,15 @@ def main():
     with open(stock_data_file, 'r') as f:
         results = json.load(f)
 
-    stock_data = [r['chart']['result'][0] for r in results]
+    reformatted_data = reformat_data(results)
+
+    data_w_dfs = get_chart_dfs(reformatted_data)
+    x=1
+
+
+
+
+
 
 
 

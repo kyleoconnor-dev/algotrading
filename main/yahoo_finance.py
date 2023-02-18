@@ -11,7 +11,7 @@ class HTTPResponseError(Exception):
 
 
 class YahooFinance:
-    QUERY_URL = "https://query1.finance.yahoo.com/v7/finance/chart/"
+    QUERY_CHART_URL = "https://query1.finance.yahoo.com/v7/finance/chart/"
     START_SECONDS = 7223400
     DAILY_HEADERS = {
         'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1) '
@@ -23,7 +23,7 @@ class YahooFinance:
     def __init__(self, session: aiohttp.ClientSession):
         self._session = session
 
-    def _build_url(
+    def _build_chart_url(
             self, ticker: str, start_date: Union[str, None] = None,
             end_date: Union[str, None] = None, interval: str = '1d'
     ):
@@ -44,7 +44,7 @@ class YahooFinance:
             ).timestamp()
             start_seconds = int(start_dt)
 
-        site = f'{self.QUERY_URL}{ticker}'
+        site = f'{self.QUERY_CHART_URL}{ticker}'
         params = {
             'period1': start_seconds,
             'period2': end_seconds,
@@ -62,7 +62,7 @@ class YahooFinance:
         if interval not in self.INTERVALS:
             raise AssertionError(f'interval must be one of {self.INTERVALS}')
 
-        site, params = self._build_url(ticker, start_date, end_date, interval)
+        site, params = self._build_chart_url(ticker, start_date, end_date, interval)
 
         async with self._session.get(site, params=params) as response:
             if not response.ok:
@@ -70,6 +70,3 @@ class YahooFinance:
                 raise HTTPResponseError(status)
             raw_data = await response.json()
             return raw_data
-
-
-
