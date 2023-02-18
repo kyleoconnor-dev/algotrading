@@ -3,8 +3,15 @@ from typing import Union
 
 import aiohttp
 
+
+class HTTPResponseError(Exception):
+    def __init__(self, status):
+        self.message = f'HTTPError: {status}'
+        super().__init__(self.message)
+
+
 class YahooFinance:
-    QUERY_URL = "https://query1.finance.yahoo.com/v8/finance/chart/"
+    QUERY_URL = "https://query1.finance.yahoo.com/v7/finance/chart/"
     START_SECONDS = 7223400
     DAILY_HEADERS = {
         'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1) '
@@ -33,7 +40,7 @@ class YahooFinance:
             start_seconds = self.START_SECONDS
         else:
             start_dt = datetime.datetime.strptime(
-                start_date, '%Y-%m-%d'
+                start_date, '%Y-%m-%d %H:%M:%S'
             ).timestamp()
             start_seconds = int(start_dt)
 
@@ -58,6 +65,9 @@ class YahooFinance:
         site, params = self._build_url(ticker, start_date, end_date, interval)
 
         async with self._session.get(site, params=params) as response:
+            if not response.ok:
+                status = response.status
+                raise HTTPResponseError(status)
             raw_data = await response.json()
             return raw_data
 

@@ -7,8 +7,10 @@ last modified: 2022-05-18
 """
 
 import asyncio
+import datetime
 import datetime as dt
 import inspect
+import json
 import os
 import smtplib
 import numpy as np
@@ -24,7 +26,7 @@ from email.mime.text import MIMEText
 from email.mime.base import MIMEBase
 from email import encoders
 
-from yahoo_finance import YahooFinance
+from yahoo_finance import YahooFinance, HTTPResponseError
 
 SCRIPT_PTH = os.path.realpath(inspect.stack()[0][1])
 SCRIPT_LOC = os.path.dirname(SCRIPT_PTH)
@@ -34,6 +36,7 @@ sys.path.insert(0, SCRIPT_LOC)
 sys.path.insert(0, PARENT_DIR)
 
 stock_sym_loc = os.path.join(PARENT_DIR, 'docs', 'NYSE.txt')
+stock_data_file = os.path.join(PARENT_DIR, 'docs', 'data.json')
 
 SPANS = ['13', '48', '50', '200']
 
@@ -218,17 +221,51 @@ def get_html(stock_options):
 #     session.quit()
 #     print('Mail Sent')
 
-async def get_data(yahoo_fin):
-    data = await yahoo_fin.get_daily_data('AAPL')
-    return data
+async def get_stock_data(symbols, start, end):
+    async with aiohttp.ClientSession() as session:
+        yah_fin = YahooFinance(session)
+        tasks = []
+        for s in symbols:
+            tasks.append(
+                yah_fin.get_daily_data(s, start, end)
+            )
+
+        stock_data = await asyncio.gather(*tasks, return_exceptions=True)
+        return stock_data
+
+def main():
+
+    # comment out code below is for production use
+
+    # stock_symbols = []
+    # with open(stock_sym_loc, 'r') as f:
+    #     lines = f.readlines()[1:]
+    #     for line in lines:
+    #         sym = line.strip().split('\t')[0]
+    #         stock_symbols.append(sym)
+    #
+    # now = datetime.datetime.now()
+    # now_str = now.strftime('%Y-%m-%d %H:%M:%S')
+    #
+    # start = now - datetime.timedelta(days=365)
+    # start_str = start.strftime('%Y-%m-%d %H:%M:%S')
+    #
+    # stock_data = asyncio.run(
+    #     get_stock_data(stock_symbols, start_str, now_str)
+    # )
+    #
+    # results = [d for d in stock_data if not isinstance(d, HTTPResponseError)]
+    #
+    # stock_str = json.dumps(results)
+
+    # load the data in development
+
+    with open(stock_data_file, 'r') as f:
+        results = json.load(f)
+
+    stock_data = [r['chart']['result'][0] for r in results]
+
 
 
 if __name__ == '__main__':
-    async def get_r():
-        async with aiohttp.ClientSession() as session:
-            yahoo_fin = YahooFinance(session)
-            data = await get_data(yahoo_fin)
-            x=1
-
-    asyncio.run(get_r())
-    x=1
+    main()
